@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/plugins/sits_viewer" >
+        <file>icon.png</file>
+    </qresource>
+</RCC>
