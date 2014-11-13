@@ -1,4 +1,4 @@
 sits_viewer
 ===========
 
-Plugin for Satellite Image Time Series (SITS) visualization
+Plugin for Satellite Image Time Series visualization
