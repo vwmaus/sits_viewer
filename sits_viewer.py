@@ -306,7 +306,10 @@ class sits_viewer:
         # Make plot visible
         plt.xlabel("time")
         plt.ylabel("Value")
-        plt.title("Coordinates: "+str(x)+", "+str(y))
+        plt.ylim(0, 1)
+        plt.title("Center coordinates: "+
+                  str(data["result"]["center_coordinates"]["longitude"])+
+                  ", "+str(data["result"]["center_coordinates"]["latitude"]))
         plt.legend()
         plt.grid(True)
                 
@@ -314,6 +317,7 @@ class sits_viewer:
         figManager = plt.get_current_fig_manager()
         figManager.window.showMaximized()
         plt.show()
+        
                 
         #self.dlg.setTextBrowser( str("The plot button allows to plot the the time series for the same coordinates selecting a different product and datasets.") )
         #QMessageBox.information( self.iface.mainWindow(),"Info", "X,Y = %s,%s" % (str(point.x()),str(point.y())) )
