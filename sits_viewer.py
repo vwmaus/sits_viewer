@@ -35,8 +35,6 @@ import datetime
 import time
 import unicodedata
 import scipy
-from scipy.signal import savgol_coeffs, savgol_filter
-from scipy.signal._savitzky_golay import _polyder
 
 # Initialize Qt resources from file resources.py
 import resources_rc
@@ -74,10 +72,14 @@ class sits_viewer:
         self.iface.addPluginToMenu("&some text that appears in the menu", self.action)
         
         # Add filters
-        filtersList = ["Savitzky-Golay","Wavelet"]
-        nProducts = len(filtersList)
-        for i in range(nProducts):
-           self.dlg.addFilters(str(filtersList[i]))
+        #filtersList = ["Savitzky-Golay","Wavelet"]
+        #nProducts = len(filtersList)
+        #for i in range(nProducts):
+           #self.dlg.addFilters(str(filtersList[i]))
+        #filtersList = ["none"]
+        #nProducts = len(filtersList)
+        #for i in range(nProducts):
+           #self.dlg.addFilters(str(filtersList[i]))
         
         chronosURL = str("http://www.dpi.inpe.br/mds/mds/product_list?&output_format=json")
         if not(self.url_exists(chronosURL)):
@@ -100,7 +102,8 @@ class sits_viewer:
         QObject.connect(self.clickTool, SIGNAL("canvasClicked(const QgsPoint &, Qt::MouseButton)"), self.getCoordinatesMouseDown)
         
         # Update dataset list
-        QObject.connect(self.dlg.ui.listWidget_products, SIGNAL("itemClicked(QListWidgetItem *)"), self.update_datasetList)
+        #QObject.connect(self.dlg.ui.listWidget_products, SIGNAL("itemClicked(QListWidgetItem *)"), self.update_datasetList)
+        QObject.connect(self.dlg.ui.pushButton_showcoverages, SIGNAL("clicked()"), self.update_datasetList)
         
         # Update dataset list
         #QObject.connect(self.dlg.ui.pushButton_list_datasets, SIGNAL("clicked()"), self.update_datasetList)
@@ -111,34 +114,12 @@ class sits_viewer:
         # Save CSV
         QObject.connect(self.dlg.ui.pushButton_save, SIGNAL("clicked()"), self.saveCSV)
 
-    def timeSeriesFilter(self, x, filterType):
-        if   filterType == "Savitzky-Golay":
-            x = np.array(x)
-            x = savgol_filter(x, 7, 4)
-            return x
-          
-        elif filterType == "Wavelet":
-            x = np.array(x)
-            x = savgol_filter(x, 7, 4)
-            return x
-          
-        elif filterType == "Wavelet":
-            x = np.array(x)
-            x = medfilt(x, 7, 4)
-            return x
-          
-        #else:
-            #x = np.array(x)
-            #x = medfilt(x, 7, 4)
-            #return x
-
-    
+   
     def saveCSV(self):
         className = self.dlg.ui.lineEdit_classname.displayText()
         if className=="":
            QMessageBox.information( self.iface.mainWindow(),"Info", "Missing class name. \nPlease type a class name." )
            return None
-        
         
         # Get selected dataset list
         items = self.dlg.ui.listWidget_datasets.selectedItems()
@@ -175,26 +156,28 @@ class sits_viewer:
         self.dlg.clearDatasets()
         
         # Check MODIS produc selection
-        product = self.dlg.ui.listWidget_products.currentItem()
-        if not(product):
-            #self.dlg.setTextBrowser(  str("Missing the product. Please select one MODIS product.")  ) 
+        products = self.dlg.ui.listWidget_products.selectedItems()
+        if not(products):
             QMessageBox.information( self.iface.mainWindow(),"Info", "Missing the product. \nPlease select one MODIS product." )
             return None
-        # Check server connection 
-        chronosURL = str("http://www.dpi.inpe.br/mds/mds/dataset_list?product="+str(product.text())+"&output_format=json")
-        if not(self.url_exists(chronosURL)):
-            self.dlg.setTextBrowser(  str("The server does not respond. Connection timed out "+chronosURL)  ) 
-            return None
-        # Get datasets list and add to QlistWidget
-        response = urllib2.urlopen(chronosURL)
-        data = json.load(response)
-        datasetsList = data["datasets"]
-        nDatasets = len(datasetsList)
-        for i in range(nDatasets):
-            datasetName = unicodedata.normalize('NFKD', datasetsList[i]).encode('ascii','ignore')
-            if datasetName!="day2" and datasetName!="day" and datasetName!="day2" and datasetName!="quality" and datasetName!="reliability" and datasetName!="viewangle":
-              self.dlg.ui.listWidget_datasets.addItem(datasetName)
-
+        
+        for i in list(products):
+            # Check server connection 
+            chronosURL = str("http://www.dpi.inpe.br/mds/mds/dataset_list?product="+str(i.text())+"&output_format=json")
+            if not(self.url_exists(chronosURL)):
+                self.dlg.setTextBrowser(  str("The server does not respond. Connection timed out "+chronosURL)  ) 
+                return None
+            # Get datasets list and add to QlistWidget
+            response = urllib2.urlopen(chronosURL)
+            data = json.load(response)
+            datasetsList = data["datasets"]
+            nDatasets = len(datasetsList)
+            for j in range(nDatasets):
+                datasetName = unicodedata.normalize('NFKD', datasetsList[j]).encode('ascii','ignore')
+                if datasetName!="day2" and datasetName!="day" and datasetName!="day2" and datasetName!="quality" and datasetName!="reliability" and datasetName!="viewangle":
+                  self.dlg.ui.listWidget_datasets.addItem(str(i.text())+str(".")+str(datasetName))
+                  
+        
     def unload(self):
         # Remove the plugin menu item and icon
         self.iface.removePluginMenu("&some text that appears in the menu",self.action)
@@ -234,20 +217,6 @@ class sits_viewer:
         # Close existent plot window and clear datasets
         plt.close()
  
-        # Get selected product
-        product = self.dlg.ui.listWidget_products.currentItem().text()
-
-        # Get selected dataset list
-        items = self.dlg.ui.listWidget_datasets.selectedItems()
-        if not(items):
-           #self.dlg.setTextBrowser(  str("Missing a dataset. Please select one or more datasets.")  ) 
-           QMessageBox.information( self.iface.mainWindow(),"Info", "Missing dataset. \nPlease select one or more datasets." )
-           return None
-        
-        datasetsList = []
-        for i in list(items):
-            datasetsList.append(str(i.text()))
-       
         coordinatesString = self.dlg.ui.lineEdit_coordinates.displayText()
         #self.dlg.setTextBrowser(str(coordinatesString))
         
@@ -259,55 +228,55 @@ class sits_viewer:
         x = float(coordinatesString.split(',', 1 )[0])
         y = float(coordinatesString.split(',', 1 )[1])
         
-        #self.dlg.setTextBrowser(str(coordinatesString))
-        # create URL with click point
-        point = QgsPoint(x,y)
-        chronosURL = str("http://www.dpi.inpe.br/mds/mds/query?product="+str(product)+"&datasets="+str(",".join(datasetsList))+
-                         "&longitude="+str(point.x())+"&latitude="+str(point.y())+"&output_format=json")
-
-        # Check server connection 
-        if not(self.url_exists(chronosURL)):
-            self.dlg.setTextBrowser(  str("The server does not respond. Connection timed out for: "+chronosURL)  )
-            QMessageBox.information( self.iface.mainWindow(),"Info", "The server does not respond. \nConnection timed out!\n"+chronosURL )
-            return None
-  
-        # get datasets from Chronos
-        response = urllib2.urlopen(chronosURL)
-        data = json.load(response)
-        
-        # Check if dataset is valid to plot
-        if data["result"]["datasets"][0]["values"]==None:
-           QMessageBox.information( self.iface.mainWindow(),"Info", "There are no datasets for this coordinates!\n\nLongitude = "+str(point.x())+", Latitude: "+str(point.y()))
+        # Get selected dataset list
+        items = self.dlg.ui.listWidget_datasets.selectedItems()
+        if not(items):
+           #self.dlg.setTextBrowser(  str("Missing a dataset. Please select one or more datasets.")  ) 
+           QMessageBox.information( self.iface.mainWindow(),"Info", "Missing dataset. \nPlease select one or more datasets." )
            return None
         
-        # Get selected filter
-        item = self.dlg.ui.listWidget_filters.currentItem()
-        filterType = False
-        if item:
-           filterType = item.text()
-           
-        self.dlg.setTextBrowser( "Filter: "+str(filterType) )
+        for i in list(items):
+          
+            product = str(i.text()).split('.', 1 )[0]
+            dataset = str(i.text()).split('.', 1 )[1]
         
-        # process dates 
-        timeline = self.transform_dates(data["result"]["timeline"])
+            # create URL with click point
+            point = QgsPoint(x,y)
+            chronosURL = str("http://www.dpi.inpe.br/mds/mds/query?product="+str(product)+"&datasets="+str(dataset)+
+                            "&longitude="+str(point.x())+"&latitude="+str(point.y())+"&output_format=json")
 
-        # Create plot for each dataset
-        nDatasets = len(data["result"]["datasets"])
-        for j in range(nDatasets):
-           datasetName = str(data["result"]["datasets"][j]["dataset"])
-           # Check if dataset is valid to plot
-           if datasetName!="day2" and datasetName!="day" and datasetName!="day2" and datasetName!="quality" and datasetName!="reliability" and datasetName!="viewangle":
-              values = self.compute_pre_processing(data["result"]["datasets"][j])
-              plt.plot(timeline, values, '-', linewidth=1, label=str(datasetName))
-              if filterType:
-                svalues = self.timeSeriesFilter(values, filterType)
-                plt.plot(timeline, svalues, '-', linewidth=1, label=str(str(datasetName)+"-"+str(filterType)))
+            # Check server connection 
+            if not(self.url_exists(chronosURL)):
+                self.dlg.setTextBrowser(  str("The server does not respond. Connection timed out for: "+chronosURL)  )
+                QMessageBox.information( self.iface.mainWindow(),"Info", "The server does not respond. \nConnection timed out!\n"+chronosURL )
+                return None
+      
+            # get datasets from Chronos
+            response = urllib2.urlopen(chronosURL)
+            data = json.load(response)
+            
+            # Check if dataset is valid to plot
+            if data["result"]["datasets"][0]["values"]==None:
+              QMessageBox.information( self.iface.mainWindow(),"Info", "There are no datasets for this coordinates!\n\nLongitude = "+str(point.x())+", Latitude: "+str(point.y()))
+              return None
+            
+            # process dates 
+            timeline = self.transform_dates(data["result"]["timeline"])
 
+            # Create plot for each dataset
+            nDatasets = len(data["result"]["datasets"])
+            for j in range(nDatasets):
+              datasetName = str(data["result"]["datasets"][j]["dataset"])
+              # Check if dataset is valid to plot
+              if datasetName!="day2" and datasetName!="day" and datasetName!="day2" and datasetName!="quality" and datasetName!="reliability" and datasetName!="viewangle":
+                  values = self.compute_pre_processing(data["result"]["datasets"][j])
+                  plt.plot(timeline, values, '-', linewidth=1, label=str(product)+"."+str(datasetName))
+                  
         # Make plot visible
         plt.xlabel("time")
         plt.ylabel("Value")
         plt.ylim(0, 1)
-        plt.title("Center coordinates: "+
+        plt.title("Pixel center coordinates (longitude,latitude): "+
                   str(data["result"]["center_coordinates"]["longitude"])+
                   ", "+str(data["result"]["center_coordinates"]["latitude"]))
         plt.legend()

@@ -22,7 +22,7 @@
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>180</y>
+     <y>250</y>
      <width>361</width>
      <height>61</height>
     </rect>
@@ -45,7 +45,7 @@ p, li { white-space: pre-wrap; }
     <rect>
      <x>120</x>
      <y>10</y>
-     <width>121</width>
+     <width>241</width>
      <height>131</height>
     </rect>
    </property>
@@ -55,15 +55,15 @@ p, li { white-space: pre-wrap; }
     </font>
    </property>
    <property name="title">
-    <string>Datsets</string>
+    <string>Coverages</string>
    </property>
    <widget class="QListWidget" name="listWidget_datasets">
     <property name="geometry">
      <rect>
       <x>10</x>
       <y>20</y>
-      <width>101</width>
-      <height>101</height>
+      <width>221</width>
+      <height>81</height>
      </rect>
     </property>
     <property name="font">
@@ -75,6 +75,19 @@ p, li { white-space: pre-wrap; }
      <enum>QAbstractItemView::ExtendedSelection</enum>
     </property>
    </widget>
+   <widget class="QPushButton" name="pushButton_showcoverages">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>100</y>
+      <width>141</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Show coverages</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QGroupBox" name="groupBox_products">
    <property name="geometry">
@@ -82,7 +95,7 @@ p, li { white-space: pre-wrap; }
      <x>0</x>
      <y>10</y>
      <width>121</width>
-     <height>131</height>
+     <height>121</height>
     </rect>
    </property>
    <property name="font">
@@ -108,27 +121,9 @@ p, li { white-space: pre-wrap; }
      </font>
     </property>
     <property name="selectionMode">
-     <enum>QAbstractItemView::SingleSelection</enum>
+     <enum>QAbstractItemView::ExtendedSelection</enum>
     </property>
    </widget>
-  </widget>
-  <widget class="QPushButton" name="pushButton_save">
-   <property name="geometry">
-    <rect>
-     <x>48</x>
-     <y>310</y>
-     <width>141</width>
-     <height>25</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>10</pointsize>
-    </font>
-   </property>
-   <property name="text">
-    <string>Save</string>
-   </property>
   </widget>
   <widget class="QDialogButtonBox" name="buttonBox">
    <property name="geometry">
@@ -147,42 +142,6 @@ p, li { white-space: pre-wrap; }
    <property name="standardButtons">
     <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
    </property>
-  </widget>
-  <widget class="QGroupBox" name="groupBox_filters">
-   <property name="geometry">
-    <rect>
-     <x>240</x>
-     <y>10</y>
-     <width>121</width>
-     <height>121</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>10</pointsize>
-    </font>
-   </property>
-   <property name="title">
-    <string>Filters</string>
-   </property>
-   <widget class="QListWidget" name="listWidget_filters">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>20</y>
-      <width>101</width>
-      <height>101</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>10</pointsize>
-     </font>
-    </property>
-    <property name="selectionMode">
-     <enum>QAbstractItemView::SingleSelection</enum>
-    </property>
-   </widget>
   </widget>
   <widget class="QLineEdit" name="lineEdit_coordinates">
    <property name="geometry">
@@ -223,7 +182,7 @@ p, li { white-space: pre-wrap; }
      <x>240</x>
      <y>150</y>
      <width>121</width>
-     <height>31</height>
+     <height>51</height>
     </rect>
    </property>
    <property name="font">
@@ -235,45 +194,12 @@ p, li { white-space: pre-wrap; }
     <string>Plot</string>
    </property>
   </widget>
-  <widget class="QGroupBox" name="groupBox_classname">
-   <property name="geometry">
-    <rect>
-     <x>190</x>
-     <y>240</y>
-     <width>171</width>
-     <height>71</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>10</pointsize>
-    </font>
-   </property>
-   <property name="title">
-    <string>Class name</string>
-   </property>
-   <widget class="QLineEdit" name="lineEdit_classname">
-    <property name="geometry">
-     <rect>
-      <x>5</x>
-      <y>21</y>
-      <width>161</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>10</pointsize>
-     </font>
-    </property>
-   </widget>
-  </widget>
   <widget class="QGroupBox" name="groupBox_period">
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>240</y>
-     <width>191</width>
+     <y>180</y>
+     <width>241</width>
      <height>71</height>
     </rect>
    </property>
@@ -365,13 +291,13 @@ p, li { white-space: pre-wrap; }
     </property>
    </widget>
   </widget>
-  <widget class="QPushButton" name="pushButton_folder">
+  <widget class="QPushButton" name="pushButton_save">
    <property name="geometry">
     <rect>
-     <x>4</x>
-     <y>310</y>
-     <width>41</width>
-     <height>25</height>
+     <x>240</x>
+     <y>200</y>
+     <width>121</width>
+     <height>51</height>
     </rect>
    </property>
    <property name="font">
@@ -380,21 +306,18 @@ p, li { white-space: pre-wrap; }
     </font>
    </property>
    <property name="text">
-    <string>...</string>
+    <string>Save csv</string>
    </property>
   </widget>
   <zorder>groupBox_period</zorder>
   <zorder>groupBox_datasets</zorder>
   <zorder>groupBox_products</zorder>
   <zorder>txtFeedback</zorder>
-  <zorder>pushButton_save</zorder>
   <zorder>buttonBox</zorder>
-  <zorder>groupBox_filters</zorder>
   <zorder>lineEdit_coordinates</zorder>
   <zorder>label</zorder>
   <zorder>pushButton_plot</zorder>
-  <zorder>groupBox_classname</zorder>
-  <zorder>pushButton_folder</zorder>
+  <zorder>pushButton_save</zorder>
  </widget>
  <resources/>
  <connections>
