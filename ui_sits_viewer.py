@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_sits_viewer.ui'
 #
-# Created: Fri Mar 13 15:09:13 2015
+# Created: Wed Mar 18 17:27:29 2015
 #      by: PyQt4 UI code generator 4.10.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -27,11 +27,16 @@ class Ui_sits_viewer(object):
     def setupUi(self, sits_viewer):
         sits_viewer.setObjectName(_fromUtf8("sits_viewer"))
         sits_viewer.resize(361, 332)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(sits_viewer.sizePolicy().hasHeightForWidth())
+        sits_viewer.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
         font.setPointSize(8)
         sits_viewer.setFont(font)
         self.txtFeedback = QtGui.QTextBrowser(sits_viewer)
-        self.txtFeedback.setGeometry(QtCore.QRect(0, 250, 361, 61))
+        self.txtFeedback.setGeometry(QtCore.QRect(0, 260, 361, 51))
         font = QtGui.QFont()
         font.setPointSize(10)
         self.txtFeedback.setFont(font)
@@ -70,7 +75,7 @@ class Ui_sits_viewer(object):
         font = QtGui.QFont()
         font.setPointSize(10)
         self.buttonBox.setFont(font)
-        self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Cancel|QtGui.QDialogButtonBox.Ok)
+        self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Close|QtGui.QDialogButtonBox.Ok)
         self.buttonBox.setObjectName(_fromUtf8("buttonBox"))
         self.lineEdit_coordinates = QtGui.QLineEdit(sits_viewer)
         self.lineEdit_coordinates.setGeometry(QtCore.QRect(0, 150, 241, 31))
@@ -85,7 +90,7 @@ class Ui_sits_viewer(object):
         self.label.setFont(font)
         self.label.setObjectName(_fromUtf8("label"))
         self.pushButton_plot = QtGui.QPushButton(sits_viewer)
-        self.pushButton_plot.setGeometry(QtCore.QRect(240, 150, 121, 51))
+        self.pushButton_plot.setGeometry(QtCore.QRect(240, 150, 121, 41))
         font = QtGui.QFont()
         font.setPointSize(10)
         self.pushButton_plot.setFont(font)
@@ -122,16 +127,22 @@ class Ui_sits_viewer(object):
         self.label_2.setFont(font)
         self.label_2.setObjectName(_fromUtf8("label_2"))
         self.pushButton_save = QtGui.QPushButton(sits_viewer)
-        self.pushButton_save.setGeometry(QtCore.QRect(240, 200, 121, 51))
+        self.pushButton_save.setGeometry(QtCore.QRect(240, 190, 121, 41))
         font = QtGui.QFont()
         font.setPointSize(10)
         self.pushButton_save.setFont(font)
         self.pushButton_save.setObjectName(_fromUtf8("pushButton_save"))
+        self.pushButton_clear_points = QtGui.QPushButton(sits_viewer)
+        self.pushButton_clear_points.setGeometry(QtCore.QRect(240, 230, 121, 31))
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        self.pushButton_clear_points.setFont(font)
+        self.pushButton_clear_points.setObjectName(_fromUtf8("pushButton_clear_points"))
 
         self.retranslateUi(sits_viewer)
+        QtCore.QObject.connect(self.pushButton_plot, QtCore.SIGNAL(_fromUtf8("clicked()")), sits_viewer.update)
         QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("accepted()")), sits_viewer.accept)
         QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("rejected()")), sits_viewer.reject)
-        QtCore.QObject.connect(self.pushButton_plot, QtCore.SIGNAL(_fromUtf8("clicked()")), sits_viewer.update)
         QtCore.QMetaObject.connectSlotsByName(sits_viewer)
 
     def retranslateUi(self, sits_viewer):
@@ -152,4 +163,5 @@ class Ui_sits_viewer(object):
         self.dateEdit_endDate.setDisplayFormat(_translate("sits_viewer", "MM/dd/yyyy", None))
         self.label_2.setText(_translate("sits_viewer", "Start date:", None))
         self.pushButton_save.setText(_translate("sits_viewer", "Save csv", None))
+        self.pushButton_clear_points.setText(_translate("sits_viewer", "Clear points", None))
 

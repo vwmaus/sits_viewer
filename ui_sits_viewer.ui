@@ -10,6 +10,12 @@
     <height>332</height>
    </rect>
   </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
   <property name="font">
    <font>
     <pointsize>8</pointsize>
@@ -22,9 +28,9 @@
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>250</y>
+     <y>260</y>
      <width>361</width>
-     <height>61</height>
+     <height>51</height>
     </rect>
    </property>
    <property name="font">
@@ -140,7 +146,7 @@ p, li { white-space: pre-wrap; }
     </font>
    </property>
    <property name="standardButtons">
-    <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+    <set>QDialogButtonBox::Close|QDialogButtonBox::Ok</set>
    </property>
   </widget>
   <widget class="QLineEdit" name="lineEdit_coordinates">
@@ -182,7 +188,7 @@ p, li { white-space: pre-wrap; }
      <x>240</x>
      <y>150</y>
      <width>121</width>
-     <height>51</height>
+     <height>41</height>
     </rect>
    </property>
    <property name="font">
@@ -295,9 +301,9 @@ p, li { white-space: pre-wrap; }
    <property name="geometry">
     <rect>
      <x>240</x>
-     <y>200</y>
+     <y>190</y>
      <width>121</width>
-     <height>51</height>
+     <height>41</height>
     </rect>
    </property>
    <property name="font">
@@ -309,6 +315,24 @@ p, li { white-space: pre-wrap; }
     <string>Save csv</string>
    </property>
   </widget>
+  <widget class="QPushButton" name="pushButton_clear_points">
+   <property name="geometry">
+    <rect>
+     <x>240</x>
+     <y>230</y>
+     <width>121</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>10</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Clear points</string>
+   </property>
+  </widget>
   <zorder>groupBox_period</zorder>
   <zorder>groupBox_datasets</zorder>
   <zorder>groupBox_products</zorder>
@@ -318,9 +342,26 @@ p, li { white-space: pre-wrap; }
   <zorder>label</zorder>
   <zorder>pushButton_plot</zorder>
   <zorder>pushButton_save</zorder>
+  <zorder>pushButton_clear_points</zorder>
  </widget>
  <resources/>
  <connections>
+  <connection>
+   <sender>pushButton_plot</sender>
+   <signal>clicked()</signal>
+   <receiver>sits_viewer</receiver>
+   <slot>update()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>305</x>
+     <y>155</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>186</x>
+     <y>153</y>
+    </hint>
+   </hints>
+  </connection>
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
@@ -346,22 +387,6 @@ p, li { white-space: pre-wrap; }
     <hint type="sourcelabel">
      <x>276</x>
      <y>292</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>186</x>
-     <y>153</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>pushButton_plot</sender>
-   <signal>clicked()</signal>
-   <receiver>sits_viewer</receiver>
-   <slot>update()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>305</x>
-     <y>155</y>
     </hint>
     <hint type="destinationlabel">
      <x>186</x>
