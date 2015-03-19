@@ -35,6 +35,7 @@ import datetime
 import time
 import unicodedata
 import scipy
+import csv
 
 # Initialize Qt resources from file resources.py
 import resources_rc
@@ -43,7 +44,6 @@ from sits_viewerdialog import sits_viewerDialog
 
 
 class sits_viewer:
-
 
 
     def __init__(self, iface):
@@ -63,9 +63,7 @@ class sits_viewer:
         self.provider = None
         # Makers list
         self.markers = []
-        # Init fields
-        self.resetFields()
-        self.initPlugin()
+
 
     
     def initGui(self):
@@ -78,11 +76,14 @@ class sits_viewer:
         # Add toolbar button and menu item
         self.iface.addToolBarIcon(self.action)
         self.iface.addPluginToMenu("&SITS Viewer", self.action)
-               
+
+        # Init fields
+        self.resetFields()
+
         # Update coverage list (double click in one product or slect and press the button)
         QObject.connect(self.dlg.ui.listWidget_products, SIGNAL("itemDoubleClicked(QListWidgetItem *)"), self.update_datasetList)
         QObject.connect(self.dlg.ui.pushButton_showcoverages, SIGNAL("clicked()"), self.update_datasetList)
-        
+                
         # Plot button
         QObject.connect(self.dlg.ui.pushButton_plot, SIGNAL("clicked()"), self.plotTimeSeries)
         
@@ -93,25 +94,14 @@ class sits_viewer:
         QObject.connect(self.dlg.ui.pushButton_clear_points, SIGNAL("clicked()"), plt.close)
         
         # Close windows and clear fields
-        QObject.connect(self.dlg.ui.buttonBox, SIGNAL("rejected()"), self.closePlugin)
+        #QObject.connect(self.dlg.ui.buttonBox, SIGNAL("rejected()"), self.closePlugin)
        
     def unload(self):
-        self.closePlugin()
+        self.resetFields()
+        QObject.disconnect(self.clickTool, SIGNAL("canvasClicked(const QgsPoint &, Qt::MouseButton)"), self.getCoordinatesMouseDown)
         self.iface.removePluginMenu("&SITS Viewer",self.action)
         self.iface.removeToolBarIcon(self.action)
    
-    # Init interface 
-    def initPlugin(self):
-        # Connect function to a clickTool signal that the canvas was clicked
-        QObject.connect(self.clickTool, SIGNAL("canvasClicked(const QgsPoint &, Qt::MouseButton)"), self.getCoordinatesMouseDown)
-        
-    # Close plugin
-    def closePlugin(self):
-        plt.close()
-        self.resetFields()
-        # Disconnect function to a clickTool signal that the canvas was clicked
-        QObject.disconnect(self.clickTool, SIGNAL("canvasClicked(const QgsPoint &, Qt::MouseButton)"), self.getCoordinatesMouseDown)
-
     # Init interface 
     def resetFields(self):
         self.clearPoints()
@@ -224,7 +214,7 @@ class sits_viewer:
         N = len(timeline)
         for i in range(N):
            timeline[i] = unicodedata.normalize('NFKD', timeline[i]).encode('ascii','ignore')
-           timeline[i] = datetime.datetime.strptime(timeline[i], "%Y-%m-%d") 
+           timeline[i] = datetime.datetime.strptime(timeline[i], "%Y-%m-%d").date()
         return timeline
     
     # Process coverage
@@ -239,46 +229,13 @@ class sits_viewer:
            else:
               values[i] = values[i] / float(scale_factor)
         return values
-   
-   
-    # Save csv file with the time series 
-    def saveCSV(self):
-        QMessageBox.information( self.iface.mainWindow(),"Info", "Sorry! Not yet." )
-        filepath = QFileDialog.getOpenFileName()
-        self.dlg.setTextBrowser(str(filepath))
-        
-        coordinatesString = self.dlg.ui.lineEdit_coordinates.displayText()
-        #self.dlg.setTextBrowser(str(coordinatesString))
-        
-        if coordinatesString=="":
-           #self.dlg.setTextBrowser(  str("Missing a dataset. Please select one or more datasets.")  ) 
-           QMessageBox.information( self.iface.mainWindow(),"Info", "Missing coordinates. \nPlease either type longitude,latitude or click on the map!" )
-           return None
-        
-        # Get coordinates
-        x = float(coordinatesString.split(',', 1 )[0])
-        y = float(coordinatesString.split(',', 1 )[1])
-        point = QgsPoint(x,y)
-        
-        # Get selected coverage list
-        items = self.dlg.ui.listWidget_datasets.selectedItems()
-        if not(items):
-           #self.dlg.setTextBrowser(  str("Missing a dataset. Please select one or more datasets.")  ) 
-           QMessageBox.information( self.iface.mainWindow(),"Info", "Missing dataset. \nPlease select one or more datasets." )
-           return None
-        
-        # Create plot for each selected coverage
-        for i in list(items):
-            timeline, value, longitude, latitude = self.getTimeSeries(i, point)
-            plt.plot(timeline, value, '-', linewidth=1, label=str(i.text()))
-        
 
     # Get time series for a item
     def getTimeSeries(self, item, point):
          product = str(item.text()).split('.', 1 )[0]
-         dataset = str(item.text()).split('.', 1 )[1]
+         coverage = str(item.text()).split('.', 1 )[1]
         
-         serverURL = str("http://www.dpi.inpe.br/mds/mds/query?product="+str(product)+"&datasets="+str(dataset)+
+         serverURL = str("http://www.dpi.inpe.br/mds/mds/query?product="+str(product)+"&datasets="+str(coverage)+
                           "&longitude="+str(point.x())+"&latitude="+str(point.y())+"&output_format=json")
 
          # Check server connection 
@@ -287,7 +244,7 @@ class sits_viewer:
             QMessageBox.information( self.iface.mainWindow(),"Info", "The server does not respond. \nConnection timed out!\n"+serverURL )
             return False, False, False, False
       
-         # get datasets from server
+         # get coverages from server
          response = urllib2.urlopen(serverURL)
          data = json.load(response)
             
@@ -299,10 +256,66 @@ class sits_viewer:
          # Process dates 
          timeline = self.transform_dates(data["result"]["timeline"])
          value = self.compute_pre_processing(data["result"]["datasets"][0])
+         startDate = self.dlg.ui.kdatecombobox_startDate.date()
+         endDate = self.dlg.ui.kdatecombobox_endDate.date()
+         N = len(timeline)
+         x = []
+         y = []
+         for i in range(N):
+            lowerbound = startDate.toPyDate() <= timeline[i]
+            upperbound = timeline[i] <= endDate.toPyDate()
+            if lowerbound & upperbound:
+              x.append(timeline[i])
+              y.append(value[i])
+         
          longitude = data["result"]["center_coordinates"]["longitude"]
          latitude  = data["result"]["center_coordinates"]["latitude"]
-         return timeline, value, longitude, latitude
+         return x, y, longitude, latitude
+   
+    # Save csv file with the time series 
+    def saveCSV(self):
+      
+        # Files name pattern
+        filepattern, ok = QInputDialog.getText(None, 'Input Dialog', 'Enter the file name:')
+        if ok:
+            filepattern = str(filepattern)
+        else:
+            filepattern = str("")
+        
+        # Path to save files
+        filepath = QFileDialog.getExistingDirectory(None, "Select Directory")
     
+        # Read coordinates
+        coordinatesString = self.dlg.ui.lineEdit_coordinates.displayText()
+        if coordinatesString=="":
+           #self.dlg.setTextBrowser(  str("Missing a dataset. Please select one or more datasets.")  ) 
+           QMessageBox.information( self.iface.mainWindow(),"Info", "Missing coordinates. \nPlease either type longitude,latitude or click on the map!" )
+           return None
+        x = float(coordinatesString.split(',', 1 )[0])
+        y = float(coordinatesString.split(',', 1 )[1])
+        point = QgsPoint(x,y)
+        
+        # Read selected coverage list
+        items = self.dlg.ui.listWidget_datasets.selectedItems()
+        if not(items):
+           #self.dlg.setTextBrowser(  str("Missing a dataset. Please select one or more datasets.")  ) 
+           QMessageBox.information( self.iface.mainWindow(),"Info", "Missing dataset. \nPlease select one or more datasets." )
+           return None
+        
+        # Save files for each selected coverage
+        saved_files = []
+        for i in list(items):
+            timeline, value, longitude, latitude = self.getTimeSeries(i, point)
+            filename = filepath+"/"+filepattern+"."+str(i.text())+".csv"
+            csv_out = open(filename, 'wb')
+            csv_writer = csv.writer(csv_out)
+            csv_writer.writerow(['longitude', 'latitude', 'date', 'value'])
+            rows = zip([longitude]*len(timeline), [latitude]*len(timeline), timeline, value)
+            csv_writer.writerows(rows)
+            csv_out.close()
+            saved_files.append(filename)
+         
+        QMessageBox.information( self.iface.mainWindow(),"Successfully saved", '\n'.join(map(str, saved_files)) )
     
     def plotTimeSeries(self):
         plt.close()
@@ -340,26 +353,34 @@ class sits_viewer:
         plt.grid(True)
                 
         ## Maximize window plot and show results
-        plt.show()
         figManager = plt.get_current_fig_manager()
         figManager.window.showMaximized()
+        plt.show()
         point = QgsPoint(longitude, latitude)
-        self.drawPoint(point) # Draw certer coordinates
+        self.drawPoint(point)
  
     # Run method
     def run(self):
         self.cLayer = self.iface.mapCanvas().currentLayer()
         if self.cLayer: self.provider = self.cLayer.dataProvider()
         self.canvas.setMapTool(self.clickTool)
-        
+           
         # show the dialog
         self.dlg.setWindowFlags(Qt.WindowStaysOnTopHint)
         self.dlg.show()
         
+        # Connect to mouse signal
+        QObject.connect(self.clickTool, SIGNAL("canvasClicked(const QgsPoint &, Qt::MouseButton)"), self.getCoordinatesMouseDown)
+        
         result = self.dlg.exec_()
-        if result == 1:
-            plt.close()
-            self.initPlugin()
-            
-            
-            
+        if result != 1:
+            self.resetFields()
+            # Disconnect from mouse signal (It does not work after the first time one click Ok!)
+            QObject.disconnect(self.clickTool, SIGNAL("canvasClicked(const QgsPoint &, Qt::MouseButton)"), self.getCoordinatesMouseDown)
+
+        plt.close()
+        
+        
+        
+        
+        
