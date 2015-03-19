@@ -63,7 +63,9 @@ class sits_viewer:
         self.provider = None
         # Makers list
         self.markers = []
-
+        # Init fields
+        self.resetFields()
+        self.initPlugin()
 
     
     def initGui(self):
@@ -75,53 +77,51 @@ class sits_viewer:
 
         # Add toolbar button and menu item
         self.iface.addToolBarIcon(self.action)
-        self.iface.addPluginToMenu("&some text that appears in the menu", self.action)
-        
-        # Init fields
-        self.initFields()
+        self.iface.addPluginToMenu("&SITS Viewer", self.action)
                
-        # connect our custom function to a clickTool signal that the canvas was clicked
-        QObject.connect(self.clickTool, SIGNAL("canvasClicked(const QgsPoint &, Qt::MouseButton)"), self.getCoordinatesMouseDown)
-        
-        # Update dataset list
+        # Update coverage list (double click in one product or slect and press the button)
         QObject.connect(self.dlg.ui.listWidget_products, SIGNAL("itemDoubleClicked(QListWidgetItem *)"), self.update_datasetList)
         QObject.connect(self.dlg.ui.pushButton_showcoverages, SIGNAL("clicked()"), self.update_datasetList)
         
-        # Update plot
+        # Plot button
         QObject.connect(self.dlg.ui.pushButton_plot, SIGNAL("clicked()"), self.plotTimeSeries)
         
-        # Save CSV
+        # Save CSV button
         QObject.connect(self.dlg.ui.pushButton_save, SIGNAL("clicked()"), self.saveCSV)
         
-        # Clear points
+        # Clear points button
         QObject.connect(self.dlg.ui.pushButton_clear_points, SIGNAL("clicked()"), plt.close)
         
         # Close windows and clear fields
         QObject.connect(self.dlg.ui.buttonBox, SIGNAL("rejected()"), self.closePlugin)
-
-   
        
     def unload(self):
-        # Remove the plugin menu item and icon
         self.closePlugin()
-        self.iface.removePluginMenu("&some text that appears in the menu",self.action)
+        self.iface.removePluginMenu("&SITS Viewer",self.action)
         self.iface.removeToolBarIcon(self.action)
    
     # Init interface 
-    def initFields(self):
-        self.dlg.setTextBrowser(str("The time period is not implemented yet, but it is possible to zoom in the plot window.\nTo start using the tool select one product.\nThen select one or more datasets and either click in the map or tipe the coordinates."))
-        self.dlg.clearProducts()
-        self.getProducts()
+    def initPlugin(self):
+        # Connect function to a clickTool signal that the canvas was clicked
+        QObject.connect(self.clickTool, SIGNAL("canvasClicked(const QgsPoint &, Qt::MouseButton)"), self.getCoordinatesMouseDown)
         
     # Close plugin
     def closePlugin(self):
+        plt.close()
+        self.resetFields()
+        # Disconnect function to a clickTool signal that the canvas was clicked
+        QObject.disconnect(self.clickTool, SIGNAL("canvasClicked(const QgsPoint &, Qt::MouseButton)"), self.getCoordinatesMouseDown)
+
+    # Init interface 
+    def resetFields(self):
         self.clearPoints()
         self.dlg.clearTextBrowser()
+        self.dlg.clearProducts()
         self.dlg.clearDatasets()
         self.dlg.clearTextCoordinates()
-        plt.close()
-        self.initFields()
-    
+        self.dlg.setTextBrowser(str("To start using the tool select one product.\nThen select one or more datasets and either click in the map or tipe the coordinates."))
+        self.getProducts()
+        
     # Check server
     def url_exists(self, location):
         request = urllib2.Request(location)
@@ -179,13 +179,7 @@ class sits_viewer:
                 datasetName = unicodedata.normalize('NFKD', datasetsList[j]).encode('ascii','ignore')
                 if datasetName!="day2" and datasetName!="day" and datasetName!="day2" and datasetName!="quality" and datasetName!="reliability" and datasetName!="viewangle":
                   self.dlg.ui.listWidget_datasets.addItem(str(i.text())+str(".")+str(datasetName))
-   
-   
-    # Save csv file with the time series 
-    def saveCSV(self):
-        QMessageBox.information( self.iface.mainWindow(),"Info", "Sorry! Not yet." )
-        filepath = QFileDialog.getOpenFileName()
-        self.dlg.setTextBrowser(str(filepath))
+
     
     # Get map canvas Crs 
     def getCrs(self):
@@ -245,41 +239,14 @@ class sits_viewer:
            else:
               values[i] = values[i] / float(scale_factor)
         return values
-
-    # Get time series for a item
-    def getTimeSeries(self, item, point):
-         product = str(item.text()).split('.', 1 )[0]
-         dataset = str(item.text()).split('.', 1 )[1]
+   
+   
+    # Save csv file with the time series 
+    def saveCSV(self):
+        QMessageBox.information( self.iface.mainWindow(),"Info", "Sorry! Not yet." )
+        filepath = QFileDialog.getOpenFileName()
+        self.dlg.setTextBrowser(str(filepath))
         
-         serverURL = str("http://www.dpi.inpe.br/mds/mds/query?product="+str(product)+"&datasets="+str(dataset)+
-                          "&longitude="+str(point.x())+"&latitude="+str(point.y())+"&output_format=json")
-
-         # Check server connection 
-         if not(self.url_exists(serverURL)):
-            self.dlg.setTextBrowser(  str("The server does not respond. Connection timed out for: "+serverURL)  )
-            QMessageBox.information( self.iface.mainWindow(),"Info", "The server does not respond. \nConnection timed out!\n"+serverURL )
-            return False
-      
-         # get datasets from server
-         response = urllib2.urlopen(serverURL)
-         data = json.load(response)
-            
-         # Check if dataset is valid to plot
-         if data["result"]["datasets"][0]["values"]==None:
-            QMessageBox.information( self.iface.mainWindow(),"Info", "There are no datasets for this coordinates!\n\nLongitude = "+str(point.x())+", Latitude: "+str(point.y()))
-            return False
-            
-         # Process dates 
-         timeline = self.transform_dates(data["result"]["timeline"])
-         value = self.compute_pre_processing(data["result"]["datasets"][0])
-         longitude = data["result"]["center_coordinates"]["longitude"]
-         latitude  = data["result"]["center_coordinates"]["latitude"]
-         return timeline, value, longitude, latitude
-    
-    
-    def plotTimeSeries(self):
-        plt.close()
- 
         coordinatesString = self.dlg.ui.lineEdit_coordinates.displayText()
         #self.dlg.setTextBrowser(str(coordinatesString))
         
@@ -304,7 +271,65 @@ class sits_viewer:
         for i in list(items):
             timeline, value, longitude, latitude = self.getTimeSeries(i, point)
             plt.plot(timeline, value, '-', linewidth=1, label=str(i.text()))
+        
+
+    # Get time series for a item
+    def getTimeSeries(self, item, point):
+         product = str(item.text()).split('.', 1 )[0]
+         dataset = str(item.text()).split('.', 1 )[1]
+        
+         serverURL = str("http://www.dpi.inpe.br/mds/mds/query?product="+str(product)+"&datasets="+str(dataset)+
+                          "&longitude="+str(point.x())+"&latitude="+str(point.y())+"&output_format=json")
+
+         # Check server connection 
+         if not(self.url_exists(serverURL)):
+            self.dlg.setTextBrowser(  str("The server does not respond. Connection timed out for: "+serverURL)  )
+            QMessageBox.information( self.iface.mainWindow(),"Info", "The server does not respond. \nConnection timed out!\n"+serverURL )
+            return False, False, False, False
+      
+         # get datasets from server
+         response = urllib2.urlopen(serverURL)
+         data = json.load(response)
             
+         # Check if dataset is valid to plot
+         if data["result"]["datasets"][0]["values"]==None:
+            QMessageBox.information( self.iface.mainWindow(),"Info", "There are no datasets for this coordinates!\n\nLongitude = "+str(point.x())+", Latitude: "+str(point.y()))
+            return False, False, False, False
+            
+         # Process dates 
+         timeline = self.transform_dates(data["result"]["timeline"])
+         value = self.compute_pre_processing(data["result"]["datasets"][0])
+         longitude = data["result"]["center_coordinates"]["longitude"]
+         latitude  = data["result"]["center_coordinates"]["latitude"]
+         return timeline, value, longitude, latitude
+    
+    
+    def plotTimeSeries(self):
+        plt.close()
+ 
+        coordinatesString = self.dlg.ui.lineEdit_coordinates.displayText()
+        
+        if coordinatesString=="":
+           QMessageBox.information( self.iface.mainWindow(),"Info", "Missing coordinates. \nPlease either type longitude,latitude or click on the map!" )
+           return None
+        
+        # Get coordinates
+        x = float(coordinatesString.split(',', 1 )[0])
+        y = float(coordinatesString.split(',', 1 )[1])
+        point = QgsPoint(x,y)
+        
+        # Get selected coverage list
+        items = self.dlg.ui.listWidget_datasets.selectedItems()
+        if not(items):
+           QMessageBox.information( self.iface.mainWindow(),"Info", "Missing dataset. \nPlease select one or more datasets." )
+           return None
+        
+        # Create plot for each selected coverage
+        for i in list(items):
+            timeline, value, longitude, latitude = self.getTimeSeries(i, point)
+            if not(timeline):
+              return None
+            plt.plot(timeline, value, '-', linewidth=1, label=str(i.text()))
                  
         ## Make plot visible
         plt.xlabel("time")
@@ -314,31 +339,27 @@ class sits_viewer:
         plt.legend()
         plt.grid(True)
                 
-        ## Maximize window plot
+        ## Maximize window plot and show results
+        plt.show()
         figManager = plt.get_current_fig_manager()
         figManager.window.showMaximized()
-        
-        ## Plot results
-        plt.show()
         point = QgsPoint(longitude, latitude)
-        self.drawPoint(point)
-        
-        #self.dlg.clearTextBrowser()
-        #self.dlg.setTextBrowser( str("The plot button allows to plot the the time series for the same coordinates selecting a different product and datasets.") )
-        #QMessageBox.information( self.iface.mainWindow(),"Info", "X,Y = %s,%s" % (str(point.x()),str(point.y())) )
-
-
+        self.drawPoint(point) # Draw certer coordinates
+ 
     # Run method
     def run(self):
         self.cLayer = self.iface.mapCanvas().currentLayer()
         if self.cLayer: self.provider = self.cLayer.dataProvider()
         self.canvas.setMapTool(self.clickTool)
-
+        
         # show the dialog
         self.dlg.setWindowFlags(Qt.WindowStaysOnTopHint)
         self.dlg.show()
+        
         result = self.dlg.exec_()
         if result == 1:
             plt.close()
-            self.initFields()
+            self.initPlugin()
+            
+            
             

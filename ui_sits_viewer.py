@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_sits_viewer.ui'
 #
-# Created: Wed Mar 18 17:27:29 2015
+# Created: Thu Mar 19 11:17:58 2015
 #      by: PyQt4 UI code generator 4.10.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,7 +26,7 @@ except AttributeError:
 class Ui_sits_viewer(object):
     def setupUi(self, sits_viewer):
         sits_viewer.setObjectName(_fromUtf8("sits_viewer"))
-        sits_viewer.resize(361, 332)
+        sits_viewer.resize(361, 345)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -36,7 +36,7 @@ class Ui_sits_viewer(object):
         font.setPointSize(8)
         sits_viewer.setFont(font)
         self.txtFeedback = QtGui.QTextBrowser(sits_viewer)
-        self.txtFeedback.setGeometry(QtCore.QRect(0, 260, 361, 51))
+        self.txtFeedback.setGeometry(QtCore.QRect(0, 260, 361, 61))
         font = QtGui.QFont()
         font.setPointSize(10)
         self.txtFeedback.setFont(font)
@@ -71,7 +71,7 @@ class Ui_sits_viewer(object):
         self.listWidget_products.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
         self.listWidget_products.setObjectName(_fromUtf8("listWidget_products"))
         self.buttonBox = QtGui.QDialogButtonBox(sits_viewer)
-        self.buttonBox.setGeometry(QtCore.QRect(190, 310, 171, 25))
+        self.buttonBox.setGeometry(QtCore.QRect(190, 320, 171, 25))
         font = QtGui.QFont()
         font.setPointSize(10)
         self.buttonBox.setFont(font)
@@ -102,30 +102,29 @@ class Ui_sits_viewer(object):
         self.groupBox_period.setFont(font)
         self.groupBox_period.setObjectName(_fromUtf8("groupBox_period"))
         self.label_3 = QtGui.QLabel(self.groupBox_period)
-        self.label_3.setGeometry(QtCore.QRect(10, 45, 81, 21))
+        self.label_3.setGeometry(QtCore.QRect(10, 50, 81, 21))
         font = QtGui.QFont()
         font.setPointSize(10)
         self.label_3.setFont(font)
         self.label_3.setObjectName(_fromUtf8("label_3"))
-        self.dateEdit_startDate = QtGui.QDateEdit(self.groupBox_period)
-        self.dateEdit_startDate.setGeometry(QtCore.QRect(75, 20, 111, 23))
-        font = QtGui.QFont()
-        font.setPointSize(10)
-        self.dateEdit_startDate.setFont(font)
-        self.dateEdit_startDate.setObjectName(_fromUtf8("dateEdit_startDate"))
-        self.dateEdit_endDate = QtGui.QDateEdit(self.groupBox_period)
-        self.dateEdit_endDate.setGeometry(QtCore.QRect(75, 44, 111, 23))
-        font = QtGui.QFont()
-        font.setPointSize(10)
-        self.dateEdit_endDate.setFont(font)
-        self.dateEdit_endDate.setDate(QtCore.QDate(2014, 6, 1))
-        self.dateEdit_endDate.setObjectName(_fromUtf8("dateEdit_endDate"))
         self.label_2 = QtGui.QLabel(self.groupBox_period)
         self.label_2.setGeometry(QtCore.QRect(5, 20, 81, 21))
         font = QtGui.QFont()
         font.setPointSize(10)
         self.label_2.setFont(font)
         self.label_2.setObjectName(_fromUtf8("label_2"))
+        self.kdatecombobox_startDate = KDateComboBox(self.groupBox_period)
+        self.kdatecombobox_startDate.setGeometry(QtCore.QRect(80, 20, 141, 23))
+        self.kdatecombobox_startDate.setDate(QtCore.QDate(2000, 2, 1))
+        self.kdatecombobox_startDate.setMinimumDate(QtCore.QDate(2000, 2, 1))
+        self.kdatecombobox_startDate.setMaximumDate(QtCore.QDate(2020, 12, 31))
+        self.kdatecombobox_startDate.setObjectName(_fromUtf8("kdatecombobox_startDate"))
+        self.kdatecombobox_endDate = KDateComboBox(self.groupBox_period)
+        self.kdatecombobox_endDate.setGeometry(QtCore.QRect(80, 50, 141, 23))
+        self.kdatecombobox_endDate.setDate(QtCore.QDate(2014, 1, 6))
+        self.kdatecombobox_endDate.setMinimumDate(QtCore.QDate(2000, 2, 1))
+        self.kdatecombobox_endDate.setMaximumDate(QtCore.QDate(2020, 12, 31))
+        self.kdatecombobox_endDate.setObjectName(_fromUtf8("kdatecombobox_endDate"))
         self.pushButton_save = QtGui.QPushButton(sits_viewer)
         self.pushButton_save.setGeometry(QtCore.QRect(240, 190, 121, 41))
         font = QtGui.QFont()
@@ -159,9 +158,8 @@ class Ui_sits_viewer(object):
         self.pushButton_plot.setText(_translate("sits_viewer", "Plot", None))
         self.groupBox_period.setTitle(_translate("sits_viewer", "Period", None))
         self.label_3.setText(_translate("sits_viewer", "End date:", None))
-        self.dateEdit_startDate.setDisplayFormat(_translate("sits_viewer", "MM/dd/yyyy", None))
-        self.dateEdit_endDate.setDisplayFormat(_translate("sits_viewer", "MM/dd/yyyy", None))
         self.label_2.setText(_translate("sits_viewer", "Start date:", None))
         self.pushButton_save.setText(_translate("sits_viewer", "Save csv", None))
         self.pushButton_clear_points.setText(_translate("sits_viewer", "Clear points", None))
 
+from PyKDE4.kdeui import KDateComboBox

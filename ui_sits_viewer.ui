@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>361</width>
-    <height>332</height>
+    <height>345</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -30,7 +30,7 @@
      <x>0</x>
      <y>260</y>
      <width>361</width>
-     <height>51</height>
+     <height>61</height>
     </rect>
    </property>
    <property name="font">
@@ -135,7 +135,7 @@ p, li { white-space: pre-wrap; }
    <property name="geometry">
     <rect>
      <x>190</x>
-     <y>310</y>
+     <y>320</y>
      <width>171</width>
      <height>25</height>
     </rect>
@@ -221,7 +221,7 @@ p, li { white-space: pre-wrap; }
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>45</y>
+      <y>50</y>
       <width>81</width>
       <height>21</height>
      </rect>
@@ -233,49 +233,6 @@ p, li { white-space: pre-wrap; }
     </property>
     <property name="text">
      <string>End date:</string>
-    </property>
-   </widget>
-   <widget class="QDateEdit" name="dateEdit_startDate">
-    <property name="geometry">
-     <rect>
-      <x>75</x>
-      <y>20</y>
-      <width>111</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>10</pointsize>
-     </font>
-    </property>
-    <property name="displayFormat">
-     <string>MM/dd/yyyy</string>
-    </property>
-   </widget>
-   <widget class="QDateEdit" name="dateEdit_endDate">
-    <property name="geometry">
-     <rect>
-      <x>75</x>
-      <y>44</y>
-      <width>111</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>10</pointsize>
-     </font>
-    </property>
-    <property name="date">
-     <date>
-      <year>2014</year>
-      <month>6</month>
-      <day>1</day>
-     </date>
-    </property>
-    <property name="displayFormat">
-     <string>MM/dd/yyyy</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_2">
@@ -294,6 +251,68 @@ p, li { white-space: pre-wrap; }
     </property>
     <property name="text">
      <string>Start date:</string>
+    </property>
+   </widget>
+   <widget class="KDateComboBox" name="kdatecombobox_startDate">
+    <property name="geometry">
+     <rect>
+      <x>80</x>
+      <y>20</y>
+      <width>141</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="date">
+     <date>
+      <year>2000</year>
+      <month>2</month>
+      <day>1</day>
+     </date>
+    </property>
+    <property name="minimumDate">
+     <date>
+      <year>2000</year>
+      <month>2</month>
+      <day>1</day>
+     </date>
+    </property>
+    <property name="maximumDate">
+     <date>
+      <year>2020</year>
+      <month>12</month>
+      <day>31</day>
+     </date>
+    </property>
+   </widget>
+   <widget class="KDateComboBox" name="kdatecombobox_endDate">
+    <property name="geometry">
+     <rect>
+      <x>80</x>
+      <y>50</y>
+      <width>141</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="date">
+     <date>
+      <year>2014</year>
+      <month>1</month>
+      <day>6</day>
+     </date>
+    </property>
+    <property name="minimumDate">
+     <date>
+      <year>2000</year>
+      <month>2</month>
+      <day>1</day>
+     </date>
+    </property>
+    <property name="maximumDate">
+     <date>
+      <year>2020</year>
+      <month>12</month>
+      <day>31</day>
+     </date>
     </property>
    </widget>
   </widget>
@@ -344,6 +363,18 @@ p, li { white-space: pre-wrap; }
   <zorder>pushButton_save</zorder>
   <zorder>pushButton_clear_points</zorder>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>KDateComboBox</class>
+   <extends>KComboBox</extends>
+   <header>kdatecombobox.h</header>
+  </customwidget>
+  <customwidget>
+   <class>KComboBox</class>
+   <extends>QComboBox</extends>
+   <header>kcombobox.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections>
   <connection>
