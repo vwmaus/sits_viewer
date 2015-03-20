@@ -51,7 +51,7 @@ class sits_viewer:
         self.iface = iface
         # refernce to map canvas
         self.canvas = self.iface.mapCanvas()
-        # out click tool will emit a QgsPoint on every click
+        # Create out click tool will emit a QgsPoint on every click
         self.clickTool = QgsMapToolEmitPoint(self.canvas)
         # create our GUI dialog
         self.dlg = sits_viewerDialog()
@@ -109,7 +109,7 @@ class sits_viewer:
         self.dlg.clearProducts()
         self.dlg.clearDatasets()
         self.dlg.clearTextCoordinates()
-        self.dlg.setTextBrowser(str("To start using the tool select one product.\nThen select one or more datasets and either click in the map or tipe the coordinates."))
+        self.dlg.setTextBrowser(str("To start using the tool select one product.\nThen select one or more coverages and either click in the map or tipe the coordinates."))
         self.getProducts()
         
     # Check server
@@ -250,7 +250,7 @@ class sits_viewer:
             
          # Check if dataset is valid to plot
          if data["result"]["datasets"][0]["values"]==None:
-            QMessageBox.information( self.iface.mainWindow(),"Info", "There are no datasets for this coordinates!\n\nLongitude = "+str(point.x())+", Latitude: "+str(point.y()))
+            QMessageBox.information( self.iface.mainWindow(),"Info", "There are no coverages for this coordinates!\n\nLongitude = "+str(point.x())+", Latitude: "+str(point.y()))
             return False, False, False, False
             
          # Process dates 
@@ -299,7 +299,7 @@ class sits_viewer:
         items = self.dlg.ui.listWidget_datasets.selectedItems()
         if not(items):
            #self.dlg.setTextBrowser(  str("Missing a dataset. Please select one or more datasets.")  ) 
-           QMessageBox.information( self.iface.mainWindow(),"Info", "Missing dataset. \nPlease select one or more datasets." )
+           QMessageBox.information( self.iface.mainWindow(),"Info", "Missing coverage. \nPlease select one or more coverages." )
            return None
         
         # Save files for each selected coverage
@@ -334,7 +334,7 @@ class sits_viewer:
         # Get selected coverage list
         items = self.dlg.ui.listWidget_datasets.selectedItems()
         if not(items):
-           QMessageBox.information( self.iface.mainWindow(),"Info", "Missing dataset. \nPlease select one or more datasets." )
+           QMessageBox.information( self.iface.mainWindow(),"Info", "Missing coverage. \nPlease select one or more coverages." )
            return None
         
         # Create plot for each selected coverage
@@ -368,17 +368,20 @@ class sits_viewer:
         # show the dialog
         self.dlg.setWindowFlags(Qt.WindowStaysOnTopHint)
         self.dlg.show()
-        
+
         # Connect to mouse signal
         QObject.connect(self.clickTool, SIGNAL("canvasClicked(const QgsPoint &, Qt::MouseButton)"), self.getCoordinatesMouseDown)
         
         result = self.dlg.exec_()
         if result != 1:
             self.resetFields()
-            # Disconnect from mouse signal (It does not work after the first time one click Ok!)
+            # Disconnect from mouse signal
             QObject.disconnect(self.clickTool, SIGNAL("canvasClicked(const QgsPoint &, Qt::MouseButton)"), self.getCoordinatesMouseDown)
-
-        plt.close()
+            del(self.clickTool)
+            # Create out click tool will emit a QgsPoint on every click
+            self.clickTool = QgsMapToolEmitPoint(self.canvas)
+            plt.close()
+        
         
         
         
