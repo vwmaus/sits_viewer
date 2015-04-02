@@ -184,6 +184,12 @@ class sits_viewer:
         res = QgsCoordinateReferenceSystem()
         res.createFromProj4("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
         return res
+    
+    # Create Sinusoidal Crs 
+    def createSinuCrs(self):
+        res = QgsCoordinateReferenceSystem()
+        res.createFromProj4("+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs")
+        return res
       
     # Get coordinates from clicked point and convert to WGS84
     def getCoordinatesMouseDown(self, point, button):
@@ -195,6 +201,30 @@ class sits_viewer:
         self.dlg.setTextCoordinates(str(point.x())+","+str(point.y()))
         self.plotTimeSeries()
 
+    # Get modis information
+    def getMODISInfo(self, longitude, latitude):
+        point = QgsPoint(longitude, latitude)
+        coordSysWGS84 = self.createWGS84Crs()
+        coordSysSinu = self.createSinuCrs()
+        CoordinateTransform = qgis.core.QgsCoordinateTransform
+        point = CoordinateTransform(coordSysWGS84, coordSysSinu).transform(point)
+        pixelsize = 231.656358263889
+        tilesize = 1111950.51966666709631681442
+        nhtiles = 36
+        nvtiles = 18
+        ncells = int(tilesize/pixelsize)
+        xmin = - tilesize*nhtiles/2
+        ymax = tilesize*nvtiles/2
+        dx = point.x() - xmin
+        dy = ymax - point.y()
+        col = int(dx/pixelsize)
+        row = int(dy/pixelsize)
+        h = int(abs(dx / tilesize))
+        v = int(abs(dy / tilesize))
+        j = col - ncells * h
+        i = row - ncells * v
+        return col, row, h, v, j, i
+        
     # Draw point in the canvas
     def drawPoint(self, point):
         canvasCrs = self.getCrs()
@@ -358,6 +388,9 @@ class sits_viewer:
         plt.show()
         point = QgsPoint(longitude, latitude)
         self.drawPoint(point)
+        
+        col, row, h, v, j, i = self.getMODISInfo(longitude, latitude)
+        self.dlg.setTextBrowser(  str("Tile h:"+str(h)+"v:"+str(v)+"  j:"+str(j)+"  i:"+str(i)+"\ncol:"+str(col)+"   row:"+str(row))  ) 
  
     # Run method
     def run(self):
