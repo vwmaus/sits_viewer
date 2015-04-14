@@ -109,7 +109,7 @@ class sits_viewer:
         self.dlg.clearProducts()
         self.dlg.clearDatasets()
         self.dlg.clearTextCoordinates()
-        self.dlg.setTextBrowser(str("To start using the tool select one product.\nThen select one or more coverages and either click in the map or tipe the coordinates."))
+        self.dlg.setTextBrowser(str("How to use? \n1. Double click a satellite product or select many products and click \"Show coverages\". \n2. Select one or more coverages and either click on the map or tipe the coordinates and click \"Plot\"."))
         self.getProducts()
         
     # Check server
